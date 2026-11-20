@@ -1,0 +1,16 @@
+.anchor
+.DS_Store
+target
+**/*.rs.bk
+node_modules
+test-ledger
+.yarn
+.surfpool
+
+# Local editor and project memory
+.cursor/
+
+# Secrets. Program keypairs already live under target/deploy.
+.env
+.env.*
+*-keypair.json
