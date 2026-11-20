@@ -1,0 +1,47 @@
+use anchor_lang::prelude::*;
+use anchor_spl::token_2022::Token2022;
+use anchor_spl::token_2022::spl_token_2022::{
+    extension::ExtensionType,
+    state::Mint,
+}
+
+#[derive(Accounts)]
+pub struct CreateMint<'info> {
+
+    // The payer signs to say "you may take SOL from me".
+    // Creating the mints costs SOL.
+    #[account(mut)]
+    pub payer: Signer<'info>,
+
+    // The mint signs to say "this new address is mine".
+    // The account does not exist yet,, the signature proces
+    // you own the key for the address where it wil be created.
+    #[account(mut)]
+    pub mint: Signer<'info>,
+
+    // The tutors code uses the Interface<TokenInterface> type here.
+    // This is where you can use the old and new token programs.
+    // You've used Token2022 because you are specifically using this program.
+    pub token_program: Program<'info, Token2022>,
+
+    // The system program is used to create the account.
+    pub system_program: Program<'info, System>,
+}
+
+pub fn create_mint(ctx: Context<CreateMint>) -> Result<()> {
+
+    // THIS ORDER IS THE SAME FOR EVERY TOKEN-2022 MINT.
+    // 1. Create a list of the extensions you want to use.
+    // 2. Ask Token-2022 for the byte size with try_calculate_account_len
+    // 3. Create the account at that size 
+
+    let extensions = [
+        ExtensionType::TransferFeeConfig,
+        ExtensionType::MetadataPointer,
+        ExtensionType::DefaultAccountState,
+        ExtensionType::MintCloseAuthority,
+    ];
+
+    let space = ExtensionType::try_calculate_account_len::<Mint>(&extensions)?;
+    Ok(())
+}

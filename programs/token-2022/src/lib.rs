@@ -14,4 +14,8 @@ declare_id!("BKP2EJezJNLM9rzHqnsisjDgN7QpQn8BauYbbLD69L2v");
 #[program]
 pub mod token_2022 {
     use super::*;
+
+    pub fn create_mint(ctx: Context<CreateMint>) -> Result<()> {
+        Ok(())
+    }
 }
