@@ -22,7 +22,7 @@ custom-panic = []
 
 [dependencies]
 anchor-lang = "1.2.2"
-anchor-spl = { version = "1.2.2", features = ["token_2022"] }
+anchor-spl = { version = "1.2.2", features = ["token_2022", "token_2022_extensions"]}
 
 [dev-dependencies]
 # Cargo.lock pins LiteSVM's Rust-1.89-compatible dependency graph.
