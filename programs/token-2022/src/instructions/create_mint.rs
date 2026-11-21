@@ -1,10 +1,19 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token_2022::Token2022;
+use anchor_spl::token_2022::{
+    Token2022, 
+    initialize_mint2, 
+    InitializeMint2,
+};
 use anchor_spl::token_2022::spl_token_2022::{
     extension::ExtensionType,
-    state::Mint,
-}
-use anchor_spl::token_2022_extensions::{mint_close_authority_initialize, MintCloseAuthorityInitialize};
+    state::{Mint, AccountState},
+};
+use anchor_spl::token_2022_extensions::{
+    MintCloseAuthorityInitialize,
+    MetadataPointerInitialize,
+    DefaultAccountStateInitialize,
+    TransferFeeInitialize,
+};
 
 #[derive(Accounts)]
 pub struct CreateMint<'info> {
@@ -77,6 +86,65 @@ pub fn create_mint(ctx: Context<CreateMint>) -> Result<()> {
                 mint: ctx.accounts.mint.to_account_info(),
             },
         ),
+        Some(&ctx.accounts.payer.key()),
+    )?;
+
+    // Metadata pointer is a mint extension, not a token one.
+    // It tells wallets where the token's metadata lives. 
+    anchor_spl::token_2022_extensions::metadata_pointer_initialize(
+        CpiContext::new(
+            ctx.accounts.token_program.key(),
+            MetadataPointerInitialize { 
+                token_program_id: ctx.accounts.token_program.to_account_info(),
+                mint: ctx.accounts.mint.to_account_info(),
+            },
+        ),
+        Some(ctx.accounts.payer.key()),
+        Some(ctx.accounts.mint.key()),
+    )?;
+
+    // Default account state is a mint extension.
+    // It writes the starting rule for every new token account, frozen means that
+    // the a new holder cannot send tokens until their ownn account is thawed.
+    anchor_spl::token_2022_extensions::default_account_state_initialize(
+        CpiContext::new(
+            ctx.accounts.token_program.key(),
+            DefaultAccountStateInitialize { 
+                token_program_id: ctx.accounts.token_program.to_account_info(),
+                mint: ctx.accounts.mint.to_account_info(),
+            },
+        ),
+        &AccountState::Frozen,
+    )?;
+
+    // Transfer fee is a mint extension.
+    // It takes a fee on every transfer. The payer can change the rate later. 
+    anchor_spl::token_2022_extensions::transfer_fee_initialize(
+        CpiContext::new(
+            ctx.accounts.token_program.key(),
+            TransferFeeInitialize { 
+                token_program_id: ctx.accounts.token_program.to_account_info(),
+                mint: ctx.accounts.mint.to_account_info(),
+            },
+        ),
+        Some(&ctx.accounts.payer.key()),
+        Some(&ctx.accounts.payer.key()),
+        100,
+        1_000_000,
+    )?;
+
+    // InitializeMint2 seals the mint, it writes the decimals, who may mint
+    // and who may freeze it. 
+    // This is not an extension, and after this has run no other extensions can be used.
+    initialize_mint2(
+        CpiContext::new(
+            ctx.accounts.token_program.key(),
+            InitializeMint2 {
+                mint: ctx.accounts.mint.to_account_info(),
+            },
+        ),
+        6,
+        &ctx.accounts.payer.key(),
         Some(&ctx.accounts.payer.key()),
     )?;
 

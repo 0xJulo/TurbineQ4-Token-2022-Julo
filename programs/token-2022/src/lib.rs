@@ -16,6 +16,6 @@ pub mod token_2022 {
     use super::*;
 
     pub fn create_mint(ctx: Context<CreateMint>) -> Result<()> {
-        Ok(())
+        instructions::create_mint::create_mint(ctx)
     }
 }
