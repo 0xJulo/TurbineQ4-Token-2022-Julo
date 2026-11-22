@@ -3,16 +3,8 @@ use solana_keypair::Keypair;
 use solana_signer::Signer;
 use anchor_lang::{InstructionData, ToAccountMetas};
 use anchor_spl::token_2022::spl_token_2022::{
-    extension::{
-        BaseStateWithExtensions, 
-        ExtensionType, 
-        StateWithExtensions,
-        default_account_state::DefaultAccountState,
-        metadata_pointer::MetadataPointer,
-        mint_close_authority::MintCloseAuthority,
-        transfer_fee::TransferFeeConfig,
-    }, 
-    state::{Account, AccountState, Mint}
+    extension::{StateWithExtensions}, 
+    state::{Account, AccountState}
 };
 
 #[test]
@@ -107,4 +99,23 @@ pub fn thaw_account() {
         token_account: user_token_account,
         token_program: anchor_spl::token_2022::ID,
     };
+
+    let thaw_ix = anchor_lang::solana_program::instruction::Instruction {
+        program_id: t22_remittance::ID,
+        accounts: thaw_accounts.to_account_metas(None),
+        data: t22_remittance::instruction::ThawAccount {}.data(),
+    };
+
+    let thaw_tx = solana_transaction::Transaction::new_signed_with_payer(
+        &[thaw_ix],
+        Some(&payer.pubkey()),
+        &[&payer],
+        svm.latest_blockhash(),
+    );
+
+    svm.send_transaction(thaw_tx).unwrap();
+
+    let ata_after = svm.get_account(&user_token_account).unwrap();
+    let state_after = StateWithExtensions::<Account>::unpack(&ata_after.data).unwrap();
+    assert_eq!(state_after.base.state, AccountState::Initialized);
 }
