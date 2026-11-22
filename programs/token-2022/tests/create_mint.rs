@@ -3,8 +3,16 @@ use solana_keypair::Keypair;
 use solana_signer::Signer;
 use anchor_lang::{InstructionData, ToAccountMetas};
 use anchor_spl::token_2022::spl_token_2022::{
-    extension::{BaseStateWithExtensions, ExtensionType, StateWithExtensions}, 
-    state::Mint
+    extension::{
+        BaseStateWithExtensions, 
+        ExtensionType, 
+        StateWithExtensions,
+        default_account_state::DefaultAccountState,
+        metadata_pointer::MetadataPointer,
+        mint_close_authority::MintCloseAuthority,
+        transfer_fee::TransferFeeConfig,
+    }, 
+    state::{AccountState, Mint}
 };
 
 #[test]
@@ -73,4 +81,26 @@ pub fn create_mint() {
     assert!(extensions.contains(&ExtensionType::DefaultAccountState));
     assert!(extensions.contains(&ExtensionType::MintCloseAuthority));
 
+    // Check to see if the default state account extension is in the mint.
+    // Run a check to see if it is frozen.
+    // This proves the "frozen until KYC" is on the mint.
+    let default_account_state = state.get_extension::<DefaultAccountState>().unwrap();
+    assert_eq!(default_account_state.state, AccountState::Frozen as u8);
+
+    // Check if the metadata pointer extension is in the mint.
+    // The address at 0 points to the metadata address, and this should equal the mint pubkey
+    let metadata_pointer = state.get_extension::<MetadataPointer>().unwrap();
+    assert_eq!(metadata_pointer.metadata_address.0.to_bytes(), mint.pubkey().to_bytes());
+
+    // Check if the mint close authority extension is in the mint.
+    // The address at 0 points to the close authority address, and this should equal the payer pubkey
+    // which is the wallet who signed and paid the rent.
+    let mint_close_authority = state.get_extension::<MintCloseAuthority>().unwrap();
+    assert_eq!(mint_close_authority.close_authority.0.to_bytes(), payer.pubkey().to_bytes());
+
+    // Check if the transfer fee config extension is in the mint.
+    // The transfer fee is 1% (100 basis points)
+    let transfer_fee_config = state.get_extension::<TransferFeeConfig>().unwrap();
+    assert_eq!(u16::from(transfer_fee_config.newer_transfer_fee.transfer_fee_basis_points), 100);
+    assert_eq!(u64::from(transfer_fee_config.newer_transfer_fee.maximum_fee), 1_000_000);
 }
