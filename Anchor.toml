@@ -7,7 +7,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-token_2022 = "BKP2EJezJNLM9rzHqnsisjDgN7QpQn8BauYbbLD69L2v"
+t22_remittance = "BKP2EJezJNLM9rzHqnsisjDgN7QpQn8BauYbbLD69L2v"
 
 [provider]
 cluster = "localnet"

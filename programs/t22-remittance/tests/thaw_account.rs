@@ -21,7 +21,7 @@ pub fn thaw_account() {
     // Use the starting point from create_mint for setting up environment.
 
     let mut svm = LiteSVM::new();
-    svm.add_program_from_file(token_2022::ID, "../../target/deploy/token_2022.so").unwrap();
+    svm.add_program_from_file(t22_remittance::ID, "../../target/deploy/t22_remittance.so").unwrap();
 
     // Set up the person who pays for the transaction
     let payer = Keypair::new();
@@ -33,7 +33,7 @@ pub fn thaw_account() {
 
     // The CreateMint come from the create_mint instruction, it is the bit
     // under derive Accounts. Anchor generates this from the accounts struct.
-    let accounts = token_2022::accounts::CreateMint {
+    let accounts = t22_remittance::accounts::CreateMint {
         payer: payer.pubkey(),
         mint: mint.pubkey(),
         token_program: anchor_spl::token_2022::ID,
@@ -43,9 +43,9 @@ pub fn thaw_account() {
     // The instruction is a request to a ptogram, comprised of what program it is
     // going to call, which accounts it can touch, and the data
     let ix = anchor_lang::solana_program::instruction::Instruction {
-        program_id: token_2022::ID,
+        program_id: t22_remittance::ID,
         accounts: accounts.to_account_metas(None),
-        data: token_2022::instruction::CreateMint {}.data(),
+        data: t22_remittance::instruction::CreateMint {}.data(),
     };
 
     // The transaction is the envelope that is send to the chain, it holds the
@@ -100,4 +100,11 @@ pub fn thaw_account() {
     let state_before = StateWithExtensions::<Account>::unpack(&ata_before.data).unwrap();
 
     assert_eq!(state_before.base.state, AccountState::Frozen);
+
+    let thaw_accounts = t22_remittance::accounts::ThawAccount {
+        freeze_authority: payer.pubkey(),
+        mint: mint.pubkey(),
+        token_account: user_token_account,
+        token_program: anchor_spl::token_2022::ID,
+    };
 }

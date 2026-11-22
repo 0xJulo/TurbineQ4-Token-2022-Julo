@@ -12,7 +12,7 @@ pub use state::*;
 declare_id!("BKP2EJezJNLM9rzHqnsisjDgN7QpQn8BauYbbLD69L2v");
 
 #[program]
-pub mod token_2022 {
+pub mod t22_remittance {
     use super::*;
 
     pub fn create_mint(ctx: Context<CreateMint>) -> Result<()> {
