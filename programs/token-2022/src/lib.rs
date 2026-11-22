@@ -18,4 +18,8 @@ pub mod token_2022 {
     pub fn create_mint(ctx: Context<CreateMint>) -> Result<()> {
         instructions::create_mint::create_mint(ctx)
     }
+
+    pub fn thaw_account(ctx: Context<ThawAccount>) -> Result<()> {
+        instructions::thaw_account::thaw_account(ctx)
+    }
 }
