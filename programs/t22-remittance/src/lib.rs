@@ -22,4 +22,8 @@ pub mod t22_remittance {
     pub fn thaw_account(ctx: Context<ThawAccount>) -> Result<()> {
         instructions::thaw_account::thaw_account(ctx)
     }
+
+    pub fn transfer(ctx: Context<Transfer>, amount: u64) -> Result<()> {
+        instructions::transfer::transfer(ctx, amount)
+    }
 }
