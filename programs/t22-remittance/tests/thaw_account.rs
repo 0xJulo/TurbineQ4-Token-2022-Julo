@@ -1,4 +1,5 @@
-use litesvm::LiteSVM;
+mod common;
+
 use solana_keypair::Keypair;
 use solana_signer::Signer;
 use anchor_lang::{InstructionData, ToAccountMetas};
@@ -10,48 +11,11 @@ use anchor_spl::token_2022::spl_token_2022::{
 #[test]
 pub fn thaw_account() {
 
-    // Use the starting point from create_mint for setting up environment.
+    // Use the common setup function from common/mod.rs
+    let (mut svm, payer, mint) = common::setup();
 
-    let mut svm = LiteSVM::new();
-    svm.add_program_from_file(t22_remittance::ID, "../../target/deploy/t22_remittance.so").unwrap();
 
-    // Set up the person who pays for the transaction
-    let payer = Keypair::new();
-    svm.airdrop(&payer.pubkey(), 1_000_000_000).unwrap();
-
-    // Pick the address the mint will live at.
-    // The payer will be the person who pays for it.
-    let mint = Keypair::new();
-
-    // The CreateMint come from the create_mint instruction, it is the bit
-    // under derive Accounts. Anchor generates this from the accounts struct.
-    let accounts = t22_remittance::accounts::CreateMint {
-        payer: payer.pubkey(),
-        mint: mint.pubkey(),
-        token_program: anchor_spl::token_2022::ID,
-        system_program: anchor_lang::system_program::ID,
-    };
-
-    // The instruction is a request to a ptogram, comprised of what program it is
-    // going to call, which accounts it can touch, and the data
-    let ix = anchor_lang::solana_program::instruction::Instruction {
-        program_id: t22_remittance::ID,
-        accounts: accounts.to_account_metas(None),
-        data: t22_remittance::instruction::CreateMint {}.data(),
-    };
-
-    // The transaction is the envelope that is send to the chain, it holds the
-    // instruction, names the fee payer and carries the sigantures. Here it is
-    // the payers to send SOL and the mint to claim its address.
-    let tx = solana_transaction::Transaction::new_signed_with_payer(
-        &[ix],
-        Some(&payer.pubkey()),
-        &[&payer, &mint],
-        svm.latest_blockhash()
-    );
-
-    // The transaction is sent to the chain and the program is executed.
-    svm.send_transaction(tx).unwrap();
+    // CODE DEDICATED TO THIS TEST //
 
 
     // Create a new user who will hold the token
