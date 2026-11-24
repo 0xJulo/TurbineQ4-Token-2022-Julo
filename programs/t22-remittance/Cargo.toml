@@ -25,13 +25,16 @@ anchor-lang = "1.2.2"
 anchor-spl = { version = "1.2.2", features = ["token_2022", "token_2022_extensions"]}
 
 [dev-dependencies]
-# Cargo.lock pins LiteSVM's Rust-1.89-compatible dependency graph.
-litesvm = "0.15.0"
+litesvm = "0.16.0"
 solana-message = "4"
 solana-transaction = "4"
 solana-signer = "3"
 solana-keypair = "3"
-solana-zk-sdk = "4.0.0"
+solana-zk-sdk = "7"
+spl-token-2022-interface = "3.1"
+spl-token-confidential-transfer-proof-generation = "0.6"
+spl-token-confidential-transfer-proof-extraction = "0.6"
+solana-zk-elgamal-proof-interface = "0.1"
 
 
 [lints.rust]
