@@ -1,3 +1,7 @@
+#![allow(dead_code)]
+
+pub mod confidential_helpers;
+
 use litesvm::LiteSVM;
 use solana_keypair::Keypair;
 use solana_signer::Signer;

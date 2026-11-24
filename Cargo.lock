@@ -4467,10 +4467,13 @@ version = "0.1.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
+ "bytemuck",
  "litesvm",
+ "solana-compute-budget-interface",
  "solana-keypair",
  "solana-message",
  "solana-signer",
+ "solana-system-interface 3.2.0",
  "solana-transaction",
  "solana-zk-elgamal-proof-interface",
  "solana-zk-sdk 7.0.1",
