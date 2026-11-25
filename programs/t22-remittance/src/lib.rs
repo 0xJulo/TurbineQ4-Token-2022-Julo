@@ -30,4 +30,8 @@ pub mod t22_remittance {
     pub fn create_confidential_mint(ctx: Context<CreateConfidentialMint>, fee_elgamal_pubkey: [u8; 32]) -> Result<()> {
         instructions::create_confidential_mint::create_confidential_mint(ctx, fee_elgamal_pubkey)
     }
+
+    pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
+        instructions::deposit::deposit(ctx, amount)
+    }
 }
