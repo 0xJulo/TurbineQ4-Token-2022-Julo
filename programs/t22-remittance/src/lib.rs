@@ -34,4 +34,8 @@ pub mod t22_remittance {
     pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
         instructions::deposit::deposit(ctx, amount)
     }
+
+    pub fn apply_pending_balance(ctx: Context<ApplyPendingBalance>, expected_pending_balance_credit_counter: u64, new_decryptable_available_balance: [u8; 36]) -> Result<()> {
+        instructions::apply_pending_balance::apply_pending_balance(ctx, expected_pending_balance_credit_counter, new_decryptable_available_balance)
+    }
 }
