@@ -94,14 +94,19 @@ pub fn apply_pending(
     let ct = read_confidential(svm, account);
     let counter: u64 = ct.pending_balance_credit_counter.into();
     let new_available = available_balance(&ct, aes) + pending_balance(&ct, elgamal);
-    let ix = ct_ix::apply_pending_balance(
-        &anchor_spl::token_2022::ID,
-        account,
-        counter,
-        &aes.encrypt(new_available).into(),
-        &owner.pubkey(),
-        &[],
-    ).unwrap();
+    let apply_accounts = t22_remittance::accounts::ApplyPendingBalance {
+        owner: owner.pubkey(),
+        token_account: *account,
+        token_program: anchor_spl::token_2022::ID,
+    };
+    let ix = Instruction {
+        program_id: t22_remittance::ID,
+        accounts: apply_accounts.to_account_metas(None),
+        data: t22_remittance::instruction::ApplyPendingBalance {
+            expected_pending_balance_credit_counter: counter,
+            new_decryptable_available_balance: aes.encrypt(new_available).to_bytes(),
+        }.data(),
+    };
     send(svm, payer, &[ix], &[owner]);
 }
 // This will set up a confidential token account for one user. 

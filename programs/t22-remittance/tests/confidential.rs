@@ -204,15 +204,17 @@ pub fn confidential_lifecycle() {
     // Ct_ix is what makes this confidential, a shortname you've imported at the top of this file.
     // This is saying to move 100,000 tokens from public into hidden.
     // The user signs to approve the deposit, the payer signs the transaction fee. 
-    let deposit_ix = ct_ix::deposit(
-        &anchor_spl::token_2022::ID,
-        &token_account.pubkey(),
-        &mint.pubkey(),
-        100_000,
-        6,
-        &user.pubkey(),
-        &[],
-    ).unwrap();
+    let deposit_accounts = t22_remittance::accounts::Deposit {
+        owner: user.pubkey(),
+        mint: mint.pubkey(),
+        token_account: token_account.pubkey(),
+        token_program: anchor_spl::token_2022::ID,
+    };
+    let deposit_ix = Instruction {
+        program_id: t22_remittance::ID,
+        accounts: deposit_accounts.to_account_metas(None),
+        data: t22_remittance::instruction::Deposit { amount: 100_000 }.data(),
+    };
     send(&mut svm, &payer, &[deposit_ix], &[&user]);
 
     // This is a snapshot of the hidden balance adter the deposit.
